@@ -1,57 +1,12 @@
-import UIKit
+//
+//  Tokenizer.swift
+//  swift compiler
+//
+//  Created by Azzam AL-Rashed on 11/12/2019.
+//  Copyright © 2019 ficruty. All rights reserved.
+//
 
-extension String {
-    func safelyLimitedTo(length n: Int)->String {
-        let c = self
-        if (c.count <= n) { return self }
-        return String( Array(c).prefix(upTo: n) )
-    }
-}
-
-//Get nth character of a string in Swift programming language (return's String)
-extension String {
-    
-  var length: Int {
-    return count
-  }
-
-  subscript (i: Int) -> String {
-    return self[i ..< i + 1]
-  }
-
-  func substring(fromIndex: Int) -> String {
-    return self[min(fromIndex, length) ..< length]
-  }
-
-  func substring(toIndex: Int) -> String {
-    return self[0 ..< max(0, toIndex)]
-  }
-
-  subscript (r: Range<Int>) -> String {
-    let range = Range(uncheckedBounds: (lower: max(0, min(length, r.lowerBound)),
-                                        upper: min(length, max(0, r.upperBound))))
-    let start = index(startIndex, offsetBy: range.lowerBound)
-    let end = index(start, offsetBy: range.upperBound - range.lowerBound)
-    return String(self[start ..< end])
-  }
-
-}
-
-// String Extension for grabbing a character at a specific position (return's Character)
-extension String {
- 
-    func index(at position: Int, from start: Index? = nil) -> Index? {
-        let startingIndex = start ?? startIndex
-        return index(startingIndex, offsetBy: position, limitedBy: endIndex)
-    }
- 
-    func character(at position: Int) -> Character? {
-        guard position >= 0, let indexPosition = index(at: position) else {
-            return nil
-        }
-        return self[indexPosition]
-    }
-}
+import Foundation
 
 class Token {
     var tid: String = ""
@@ -72,8 +27,12 @@ class Token {
 class Tokenizer {
     var position = -1
     var line_number = 1
+    var ignore_whitespace: Bool = false
+    var source_code: String = ""
+    var length: Int = 0
     let step_keywords = ["def",
                          "var",
+                         "let",
                          "int",
                          "float",
                          "string",
@@ -89,16 +48,15 @@ class Tokenizer {
                         "[" : "left_square",
                         "]" : "right_square",
                         ";" : "semicolon",
+                        ":" : "colon",
                         "," : "comma",
                         "{" : "left_curly",
                         "}" : "right_curly",]
     
-    var source_code: String = ""
-    var length: Int = 0
-    
-    init(source_code: String) {
+    init(source_code: String, ignore_whitespace: Bool) {
         self.source_code = source_code
         self.length = source_code.count
+        self.ignore_whitespace = ignore_whitespace
     }
     
     func is_EOF() -> Bool { return !(self.position < self.length) }
@@ -106,7 +64,8 @@ class Tokenizer {
     func is_peekable() -> Bool { return (self.position + 1) < self.length }
     
     func peek() -> Character {
-        if self.is_peekable() { return self.source_code.character(at: self.position + 1)! } else { return "\0"}
+        if self.is_peekable() { return self.source_code.character(at: self.position + 1)! }
+        return "\0"
     }
     
     func number_tokenizer() -> Token {
@@ -245,7 +204,8 @@ class Tokenizer {
             } else if character.isLetter || character == "_" {
                 return self.identifier_tokenizer()
             } else if character.isWhitespace {
-                return self.whitespace_tokenizer()
+                let token = self.whitespace_tokenizer()
+                if !self.ignore_whitespace { return token }
             } else if character == "#" {
                 return self.comment_tokenizer()
             } else if character == "+" {
@@ -259,26 +219,14 @@ class Tokenizer {
             } else {
                 return Token(tid: "error", value: String(character), category: "error", position: self.position, line_number: self.line_number)
             }
+
+            self.position += 1
         }
-        self.position += 1
         return Token(tid: "EOF",value: "EOF", category: "EOF", position: self.position, line_number: self.line_number)
     }
     
 }
 
 
-var source_code = " var azzam = 10"
-var tokenizer = Tokenizer(source_code: source_code)
-var token = tokenizer.tokenize()
 
-while token.category != "EOF" {
-    
-    print("tid:        " , token.tid ,
-          "\nvalue:      ", "[\(token.value)]",
-          "\ncategory:   ", token.category,
-          "\nposition:   ", token.position,
-          "\nline_number:", token.line_number,
-          "\n-----------------------------"
-          )
-    token = tokenizer.tokenize()
-}
+
