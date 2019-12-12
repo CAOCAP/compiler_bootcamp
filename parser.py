@@ -4,41 +4,51 @@ class Node:
   pass
 
 class Statement(Node):
-  pass
+  def __init__(self, token=None):
+    self.token = token
 
 class Expression(Node):
-  pass
+  def __init__(self, value=None, vtype=None):
+    self.value = value
+    self.vtype = vtype
 
 class BinaryExpression(Expression):
   def __init__(self, left_exp, operator, right_exp): # 2 + (3 * 5)
+    super().__init__()
     self.operator = operator
     self.left_exp = left_exp    
     self.right_exp = right_exp
 
 class UnaryExpression(Expression):
   def __init__(self, operator, exp):
+    super().__init__()
     self.operator = operator
     self.expression = exp
 
 class LiteralExpression(Expression):
   def __init__(self,exp):
+    super().__init__()
     self.expression = exp
 
 class IdentifierExpression(Expression):
   def __init__(self,exp):
+    super().__init__()
     self.expression = exp
 
 class GroupingExpression(Expression):
   def __init__(self,exp):
+    super().__init__()
     self.expression = exp
 
 
-class BlockStatement(Node):
-  pass
+class BlockStatement(Statement):
+  def __init__(self, token=None, statements=[]):
+    super().__init__(token)
+    self.statements = statements
 
 class VarStatement(Statement):
   def __init__(self, token, datatype, identifier, expression):
-    self.token = token
+    super().__init__(token)
     self.datatype = datatype
     self.identifer = identifier
     self.expression = expression
@@ -46,14 +56,19 @@ class VarStatement(Statement):
 #print expression
 class PrintStatement(Statement):
   def __init__(self, token, expression):
-    self.token = token
+    super().__init__(token)
     self.expression = expression
 
 class WhileStatement(BlockStatement):
   def __init__(self, token, expression, statements=[]):
-    self.token = token
+    super().__init__(token, statements)
     self.expression = expression
-    self.statements = statements
+
+class ForStatement(BlockStatement):
+  def __init__(self, token, from_expr, to_expr, statements=[]):
+    super().__init__(token, statements)
+    self.from_expression = from_expr
+    self.to_expression = to_expr
 
 class Parser:
   def __init__(self, tokenizer):
@@ -66,6 +81,9 @@ class Parser:
   
   def syntax_error(self, token, message):
     raise Exception('[Step(syntax error)]:' + message + ', ' + token.value + ', line number: ' + str(token.line_number) + ', position: ' + str(token.position))
+
+  def unexpected_token(self):
+    self.syntax_error(self.current_token, 'unexpected token')
 
   def consume(self):
     if self.is_first_token:
@@ -83,7 +101,12 @@ class Parser:
   def match(self, token_value):
     self.consume()
     if self.current_token.value != token_value:
-      self.syntax_error(self.current_token, 'unexpected token')
+      self.unexpected_token()
+    
+  def match_category(self, token_category):
+    self.consume()
+    if self.current_token.category != token_category:
+      self.syntax_error(self.current_token, token_category + ' expected')
     
   def while_parser(self):
     # while expression {statements} 
@@ -95,6 +118,16 @@ class Parser:
     #self.match('}')
 
     return WhileStatement(while_token, expression, statements)
+  
+  def for_parser(self):
+    for_token = self.current_token
+    from_expr = self.expression()
+    self.match('to')
+    to_expr = self.expression()
+    self.match('{')
+    self.current_level += 1
+    statements = self.parse()
+    return ForStatement(for_token, from_expr, to_expr, statements)
     
   def var_parser(self):
     # var datatype id = expression
@@ -106,10 +139,7 @@ class Parser:
 
     datatype_token = self.current_token
 
-    self.consume()
-    if self.current_token.category != 'identifier':
-      self.syntax_error(self.current_token, 'identifier expected')
-
+    self.match_category('identifier')
     identifier_token = self.current_token
     self.match('=')
 
@@ -145,8 +175,19 @@ class Parser:
       operator = self.current_token
       self.consume()
       right_expr = self.term()
+      left_value = expr.value
+      right_value = right_expr.value
+      result_value = 0
+      
+      if operator.value == '+':
+        result_value = left_value + right_value
+      elif operator.value == '-':
+        result_value = left_value - right_value
+      
       expr = BinaryExpression(expr, operator, right_expr)
-    
+      expr.value = result_value
+      expr.vtype = 'int'
+
     return expr
   
   def term(self):
@@ -156,20 +197,42 @@ class Parser:
       operator = self.current_token
       self.consume()
       right_expr = self.factor()
+      
+      left_value = expr.value
+      right_value = right_expr.value
+      result_value = 0
+      
+      if operator.value == '*':
+        result_value = left_value * right_value
+      elif operator.value == '/':
+        result_value = int(left_value / right_value)
+
+      
       expr = BinaryExpression(expr, operator, right_expr)
-    
-    return expr
-    
+      expr.value = result_value
+      expr.vtype = 'int'
+      
+    return expr #(1)
     
   def factor(self):
     if self.current_token.category == 'literal':
-      return LiteralExpression(self.current_token)
+      expr = LiteralExpression(self.current_token)
+      if self.current_token.tid == 'integer_literal':
+        expr.vtype = 'int'
+        expr.value = int(self.current_token.value)
+      return expr
     elif self.current_token.category == 'identifier':
-      return IdentifierExpression(self.current_token)
+      expr = IdentifierExpression(self.current_token)
+      expr.vtype = 'int'
+      expr.value = 1
     elif self.current_token.value == '(':
-      result = GroupingExpression(self.expression())
+      expr = GroupingExpression(self.expression())
       self.match(')')
-      return result
+      expr.value = expr.expression.value
+      expr.vtype = expr.expression.vtype
+      return expr
+    
+    self.unexpected_token()
 
   def parse(self):
     statements = []
@@ -184,6 +247,8 @@ class Parser:
           statements.append(self.print_parser())
         elif self.current_token.value == 'while':
           statements.append(self.while_parser())
+        elif self.current_token.value == 'for':
+          statements.append(self.for_parser())
       elif self.current_token.value == '}':
         self.current_level -= 1
         return statements
@@ -192,9 +257,9 @@ class Parser:
       elif self.current_token.category == 'whitespace':
         continue
       elif self.current_token.category == 'error':
-        self.syntax_error(self.current_token, 'unexpected token')
+        self.unexpected_token()
       else:
-        self.syntax_error(self.current_token, 'unexpected token')
+        self.unexpected_token()
       
       self.consume() 
 
