@@ -11,6 +11,7 @@
 		EC361D4723A05FC100857536 /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC361D4623A05FC100857536 /* Tokenizer.swift */; };
 		EC361D4923A0600600857536 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC361D4823A0600600857536 /* Extensions.swift */; };
 		EC361D4B23A0609400857536 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC361D4A23A0609400857536 /* Parser.swift */; };
+		EC4D4F3D23A1F8020083E93E /* source_code_file.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4D4F3C23A1F8020083E93E /* source_code_file.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,6 +32,7 @@
 		EC361D4623A05FC100857536 /* Tokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokenizer.swift; sourceTree = "<group>"; };
 		EC361D4823A0600600857536 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		EC361D4A23A0609400857536 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		EC4D4F3C23A1F8020083E93E /* source_code_file.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = source_code_file.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				EC361D3F23A05F9500857536 /* main.swift */,
+				EC4D4F3C23A1F8020083E93E /* source_code_file.swift */,
 				EC361D4623A05FC100857536 /* Tokenizer.swift */,
 				EC361D4A23A0609400857536 /* Parser.swift */,
 				EC361D4823A0600600857536 /* Extensions.swift */,
@@ -130,6 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EC361D4B23A0609400857536 /* Parser.swift in Sources */,
+				EC4D4F3D23A1F8020083E93E /* source_code_file.swift in Sources */,
 				EC361D4923A0600600857536 /* Extensions.swift in Sources */,
 				EC361D4023A05F9500857536 /* main.swift in Sources */,
 				EC361D4723A05FC100857536 /* Tokenizer.swift in Sources */,

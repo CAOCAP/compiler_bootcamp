@@ -8,7 +8,7 @@
 
 import Foundation
 
-var source_code = "while x { var int age = 10 } "
+
 
 let tokenizer = Tokenizer(source_code: source_code, ignore_whitespace: true)
 func tokenisation() {
@@ -29,15 +29,12 @@ func tokenisation() {
 }
 
 func parsaration() {
-    
     let parser = Parser(tokenizer: tokenizer)
     let syntax_tree = parser.parse()
     if parser.current_level != 0 {
         parser.syntax_error(token: parser.current_token!, message: "brackets error")
     }
-    
     print(syntax_tree)
 }
-
 
 parsaration()
