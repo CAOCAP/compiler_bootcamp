@@ -67,28 +67,12 @@ class Parser:
   def syntax_error(self, token, message):
     raise Exception('[Step(syntax error)]:' + message + ', ' + token.value + ', line number: ' + str(token.line_number) + ', position: ' + str(token.position))
 
-<<<<<<< HEAD
-  def match(self, token_value):
-    self.current_token = self.tokenizer.tokenize()
-    if self.current_token.value != token_value:
-      self.syntax_error(self.current_token, 'unexpected token')
-  
-  
-  def print_parser(self):
-    # print literal
-    print_token = self.current_token
-    self.current_token = self.tokenizer.tokenize()
-    if self.current_token.category != 'literal':
-      self.syntax_error(self.current_token, 'literal expected')
-=======
   def consume(self):
-
     if self.is_first_token:
       self.current_token = self.tokenizer.tokenize()
       self.is_first_token = False
     else:
       self.current_token = self.next_token
->>>>>>> upstream/master
     
     self.next_token = self.tokenizer.tokenize()
 
@@ -96,15 +80,11 @@ class Parser:
     # print expression
     return PrintStatement(self.current_token, self.expression())
 
-<<<<<<< HEAD
-
-=======
   def match(self, token_value):
     self.consume()
     if self.current_token.value != token_value:
       self.syntax_error(self.current_token, 'unexpected token')
     
->>>>>>> upstream/master
   def while_parser(self):
     # while expression {statements} 
     while_token = self.current_token
@@ -125,13 +105,8 @@ class Parser:
       self.syntax_error(self.current_token, 'datatype expected')
 
     datatype_token = self.current_token
-<<<<<<< HEAD
-    self.current_token = self.tokenizer.tokenize()
-
-=======
 
     self.consume()
->>>>>>> upstream/master
     if self.current_token.category != 'identifier':
       self.syntax_error(self.current_token, 'identifier expected')
 
